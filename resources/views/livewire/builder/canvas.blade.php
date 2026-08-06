@@ -89,10 +89,10 @@
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-300' }}">
 
-                    <strong>{{ $field['label'] }}</strong>
+                    <strong>{{ $field['label'] ?? $field['key'] ?? 'Untitled' }}</strong>
 
                     <div class="text-gray-500">
-                        {{ $field['type'] }}
+                        {{ $field['type'] ?? 'unknown' }}
                     </div>
 
                     @if(!empty($field['placeholder']))

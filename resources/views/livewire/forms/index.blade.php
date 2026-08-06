@@ -61,6 +61,12 @@
 
                     </a>
 
+                    <a href="{{ route('forms.public',$form) }}">
+
+                        View
+
+                    </a>
+
                     <button
                         wire:click="delete({{ $form->id }})"
                         wire:confirm="Delete this form permanently?"

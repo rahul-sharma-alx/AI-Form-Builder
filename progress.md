@@ -93,9 +93,13 @@ Done in this phase: implemented `App\Livewire\Builder\JsonEditor` (replaces the 
 - [x] Soft-delete + `DELETE /forms/{form}` + delete button on index; status filter on index
 - [x] `FormFactory`, `tests/Feature/FormPersistenceTest` (8 tests passing)
 
-### Phase 11 — Public Form Rendering
-- [ ] Dynamic renderer from JSON schema
-- [ ] Server + client validation
+### Phase 11 — Public Form Rendering ✅
+- [x] Dynamic renderer from JSON schema (`App\Livewire\Public\Fill`, route `/forms/{form}/public`)
+- [x] Reads schema → renders steps/sections/fields (text, textarea, number, email, phone, date, dropdown, radio, checkbox, rating, heading, section, file)
+- [x] Server validation from schema (required, email, numeric min/max, date, in:options, regex, checkbox array)
+- [x] Client validation (native HTML5: required, type=email, pattern/min/max)
+- [x] Responsive layout (`max-w-3xl`), multi-step tab nav, submit → completion screen
+- [x] No AI
 
 ### Phase 12 — Form Submission
 - [ ] Store responses
