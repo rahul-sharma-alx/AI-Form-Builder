@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Form;
+use App\Support\ValidationRules;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
@@ -72,6 +73,8 @@ class FormService
     {
         $schema = $this->ensureSchemaShape($payload['schema'] ?? [], $form->title);
 
+        $schema = $this->sanitizeSchema($schema);
+
         $schemaChanged = $this->schemaChanged($form, $schema);
 
         $form->title = (string) ($payload['title'] ?? $form->title);
@@ -92,6 +95,36 @@ class FormService
         }
 
         return $form;
+    }
+
+    protected function sanitizeSchema(array $schema): array
+    {
+        if (! is_array($schema['steps'] ?? null)) {
+            return $schema;
+        }
+
+        foreach ($schema['steps'] as &$step) {
+            if (! is_array($step['sections'] ?? null)) {
+                continue;
+            }
+
+            foreach ($step['sections'] as &$section) {
+                if (! is_array($section['fields'] ?? null)) {
+                    continue;
+                }
+
+                foreach ($section['fields'] as &$field) {
+                    if (array_key_exists('validation', $field)) {
+                        $field['validation'] = ValidationRules::sanitize($field['validation']);
+                    }
+                }
+                unset($field);
+            }
+            unset($section);
+        }
+        unset($step);
+
+        return $schema;
     }
 
     protected function schemaChanged(Form $form, mixed $newSchema): bool

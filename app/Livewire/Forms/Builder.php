@@ -203,8 +203,13 @@ class Builder extends Component
     {
         [$stepIndex, $sectionIndex] = $this->locate($this->currentStepId, $this->currentSectionId);
 
-        $this->schema['steps'][$stepIndex]['sections'][$sectionIndex]['fields'][]
-            = FieldFactory::make($type);
+        $field = FieldFactory::make($type);
+
+        $this->schema['steps'][$stepIndex]['sections'][$sectionIndex]['fields'][] = $field;
+
+        $this->selectedFieldId = $field['id'];
+        $this->selectedField = $field;
+        $this->dispatch('field-selected', field: $field);
 
         $this->markDirty();
     }

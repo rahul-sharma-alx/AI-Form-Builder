@@ -97,9 +97,17 @@ Done in this phase: implemented `App\Livewire\Builder\JsonEditor` (replaces the 
 - [x] Dynamic renderer from JSON schema (`App\Livewire\Public\Fill`, route `/forms/{form}/public`)
 - [x] Reads schema → renders steps/sections/fields (text, textarea, number, email, phone, date, dropdown, radio, checkbox, rating, heading, section, file)
 - [x] Server validation from schema (required, email, numeric min/max, date, in:options, regex, checkbox array)
-- [x] Client validation (native HTML5: required, type=email, pattern/min/max)
+- [x] Schema `validation` string (`min:5|max:100`) parsed and enforced server-side (Phase 11 refinement)
+- [x] Client validation (native HTML5: required, type=email, pattern/min/max, minlength/maxlength from `min:`/`max:` rules)
 - [x] Responsive layout (`max-w-3xl`), multi-step tab nav, submit → completion screen
 - [x] No AI
+
+### Phase 11.5 — Validation-Rule Integrity (refinement)
+- [x] Builder blocks invalid validation rules (`App\Support\ValidationRules::check` + inline error, keeps last valid value)
+- [x] Schema is belt-and-suspenders sanitized on save (`FormService::sanitizeSchema`, strips unknown rules / bad params / broken regex)
+- [x] `PropertyPanel` coerces array/empty validation to `?string` (no crash on `FieldFactory::make()` default `[]`)
+- [x] Tests: `ValidationRulesTest`, `PropertyPanelTest`, `FormPersistenceTest` (save-strips-invalid), `BuilderTest`
+- [x] Fixed `sanitizeSchema` reference-loss bug caused by `foreach ($arr ?? [] as &$x)` (the `??` copies the array, breaking the `&` write-back)
 
 ### Phase 12 — Form Submission
 - [ ] Store responses

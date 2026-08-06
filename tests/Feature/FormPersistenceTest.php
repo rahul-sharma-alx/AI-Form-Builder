@@ -118,4 +118,29 @@ class FormPersistenceTest extends TestCase
         $this->assertCount(1, $normalized['steps']);
         $this->assertCount(1, $normalized['steps'][0]['sections']);
     }
+
+    public function test_save_strips_invalid_validation_rules_from_schema(): void
+    {
+        $form = Form::factory()->create();
+        $service = app(FormService::class);
+
+        $schema = $form->schema;
+        $schema['steps'][0]['sections'][0]['fields'][] = [
+            'id' => 'f1',
+            'type' => 'text',
+            'key' => 'name',
+            'validation' => 'min:5|not_a_real_rule',
+        ];
+
+        $service->save($form, [
+            'title' => $form->title,
+            'schema' => $schema,
+            'settings' => [],
+            'metadata' => [],
+        ]);
+
+        $saved = $form->refresh()->schema;
+        $field = $saved['steps'][0]['sections'][0]['fields'][0];
+        $this->assertSame('min:5', $field['validation']);
+    }
 }

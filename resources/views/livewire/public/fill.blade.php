@@ -1,7 +1,7 @@
 <div>
     @php $steps = $form->schema['steps'] ?? []; @endphp
 
-    <div x-data="{ step: 1 }" class="max-w-3xl mx-auto py-10 px-4">
+    <div class="max-w-3xl mx-auto py-10 px-4">
 
         <div class="bg-white rounded-lg shadow overflow-hidden">
 
@@ -19,39 +19,29 @@
                 </div>
             @else
 
-            @if(count($steps) > 1)
-                <div class="px-6 py-3 border-b flex flex-wrap gap-2">
-                    @foreach($steps as $i => $step)
-                        <button
-                            type="button"
-                            x-on:click="step = {{ $loop->iteration }}"
-                            class="px-3 py-1 rounded text-sm bg-gray-200 text-gray-700"
-                            x-bind:class="step === {{ $loop->iteration }} ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'">
-                            {{ $step['title'] }}
-                        </button>
-                    @endforeach
-                </div>
-            @endif
-
             <form wire:submit="submit">
 
                 @foreach($steps as $i => $step)
-                    <section x-show="step === {{ $loop->iteration }}" x-cloak class="px-6 py-6 space-y-6">
+                    <section class="px-6 py-6 space-y-6 {{ $i > 0 ? 'border-t' : '' }}">
+
+                        @if(count($steps) > 1)
+                            <h2 class="text-xl font-bold text-gray-800">{{ $step['title'] }}</h2>
+                        @endif
 
                         @foreach($step['sections'] ?? [] as $section)
                             <div>
-                                <h2 class="text-lg font-semibold text-gray-800 mb-3">{{ $section['title'] }}</h2>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-3">{{ $section['title'] }}</h3>
 
                                 <div class="space-y-5">
                                     @foreach($section['fields'] ?? [] as $field)
                                         @php $key = $field['key']; @endphp
 
                                         @if($field['type'] === 'heading')
-                                            <h3 class="text-xl font-bold">{{ $field['label'] }}</h3>
+                                            <h4 class="text-xl font-bold">{{ $field['label'] }}</h4>
 
                                         @elseif($field['type'] === 'section')
                                             <div class="border-t pt-4">
-                                                <h4 class="font-medium text-gray-700">{{ $field['label'] }}</h4>
+                                                <h5 class="font-medium text-gray-700">{{ $field['label'] }}</h5>
                                             </div>
 
                                         @else
@@ -70,6 +60,18 @@
                                                     if ($pattern) {
                                                         $pattern = preg_replace('#^/(.*)/([A-Za-z]*)$#', '$1', trim($pattern));
                                                         $attrs .= ' pattern="' . e($pattern) . '"';
+                                                    }
+                                                    $rules = $field['validation'] ?? [];
+                                                    if (is_string($rules)) { $rules = explode('|', $rules); }
+                                                    foreach ($rules as $rule) {
+                                                        if (!is_string($rule)) continue;
+                                                        $parts = explode(':', trim($rule));
+                                                        if ($parts[0] === 'min' && isset($parts[1]) && in_array($field['type'], ['text', 'textarea', 'email', 'phone', 'number'], true)) {
+                                                            $attrs .= ' minlength="' . e($parts[1]) . '"';
+                                                        }
+                                                        if ($parts[0] === 'max' && isset($parts[1]) && in_array($field['type'], ['text', 'textarea', 'email', 'phone', 'number'], true)) {
+                                                            $attrs .= ' maxlength="' . e($parts[1]) . '"';
+                                                        }
                                                     }
                                                 @endphp
 
@@ -168,15 +170,6 @@
                         @endforeach
                     </section>
                 @endforeach
-
-                @if(count($steps) > 1)
-                    <div class="px-6 py-4 border-t flex justify-between">
-                        <button type="button" x-on:click="step--" x-bind:disabled="step <= 1"
-                            class="px-4 py-2 border rounded disabled:opacity-40">Back</button>
-                        <button type="button" x-on:click="step++" x-show="step < {{ count($steps) }}"
-                            class="px-4 py-2 bg-gray-200 rounded">Next</button>
-                    </div>
-                @endif
 
                 <div class="px-6 py-4 border-t">
                     <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded font-semibold">

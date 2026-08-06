@@ -104,6 +104,9 @@
                 <label class="block text-sm font-medium mb-1">Validation Rules</label>
                 <input type="text" wire:model.live="field.validation" placeholder="min:5|max:100" class="w-full border p-2 rounded font-mono text-sm">
                 <p class="text-xs text-gray-400 mt-1">Laravel validation rule string.</p>
+                @if($validationError)
+                    <p class="text-xs text-red-600 mt-1">Invalid rule: {{ $validationError }}</p>
+                @endif
             </div>
         @endif
 

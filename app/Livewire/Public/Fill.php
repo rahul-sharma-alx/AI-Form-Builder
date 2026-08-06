@@ -68,7 +68,7 @@ class Fill extends Component
         $rules = [];
 
         if (! empty($field['required'])) {
-            $rules[] = $field['type'] === 'checkbox' ? 'required' : 'required';
+            $rules[] = 'required';
         } else {
             $rules[] = 'nullable';
         }
@@ -113,7 +113,41 @@ class Fill extends Component
             $rules[] = 'regex:' . $field['regex'];
         }
 
+        if (in_array($field['type'], ['text', 'textarea'], true)) {
+            if (isset($field['min']) && $field['min'] !== null) {
+                $rules[] = 'min:' . $field['min'];
+            }
+            if (isset($field['max']) && $field['max'] !== null) {
+                $rules[] = 'max:' . $field['max'];
+            }
+        }
+
+        foreach ($this->parseValidationRules($field) as $rule) {
+            $rules[] = $rule;
+        }
+
         return $rules;
+    }
+
+    protected function parseValidationRules(array $field): array
+    {
+        $raw = $field['validation'] ?? [];
+
+        if (is_string($raw)) {
+            $raw = explode('|', $raw);
+        }
+
+        $skip = ['required', 'nullable', 'sometimes'];
+
+        return array_filter(array_map('trim', $raw), function ($rule) use ($skip) {
+            if ($rule === '') {
+                return false;
+            }
+
+            $name = explode(':', $rule)[0];
+
+            return ! in_array($name, $skip, true);
+        });
     }
 
     protected function answerFields(): array
