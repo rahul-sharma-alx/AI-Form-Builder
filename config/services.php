@@ -28,11 +28,14 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
-    'slack' => [
-        'notifications' => [
-            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
-        ],
+    'ai' => [
+        'provider' => env('AI_PROVIDER', \App\AI\Providers\OpenAIProvider::class),
+        'model' => env('AI_MODEL', 'gpt-4o-mini'),
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'url' => env('OPENAI_URL', 'https://api.openai.com/v1/chat/completions'),
     ],
 
 ];

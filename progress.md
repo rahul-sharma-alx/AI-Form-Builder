@@ -109,13 +109,28 @@ Done in this phase: implemented `App\Livewire\Builder\JsonEditor` (replaces the 
 - [x] Tests: `ValidationRulesTest`, `PropertyPanelTest`, `FormPersistenceTest` (save-strips-invalid), `BuilderTest`
 - [x] Fixed `sanitizeSchema` reference-loss bug caused by `foreach ($arr ?? [] as &$x)` (the `??` copies the array, breaking the `&` write-back)
 
-### Phase 12 — Form Submission
-- [ ] Store responses
-- [ ] Search / pagination / CSV export / rate limiting
+### Phase 12 — Form Submission ✅
+- [x] Store responses (`App\Services\SubmissionService::store`, captures data/IP/user-agent; `Fill::submit()` now persists)
+- [x] Search (LIKE over `data` JSON, debounced) + Pagination (`App\Livewire\Submissions\Index`, route `/forms/{form}/submissions`)
+- [x] CSV Export (`SubmissionService::exportCsv` — field labels as headers, search-filtered, temp-file download)
+- [x] Validation (Phase 11 server validation reused; shared `App\Support\SchemaFields::answerable` extracted from `Fill`)
+- [x] Rate limiting (Laravel `RateLimiter`, per form + IP, limit from `form.settings.rate_limit`, default 5/min)
+- [x] Tests: `tests/Feature/SubmissionTest` (4 tests) — store, list/search, CSV, rate limit
 
-### Phase 13 — AI Form Generation
-- [ ] Queue job, AI service, provider interface, prompt builder
-- [ ] Schema validator, retry logic, repair malformed JSON
+Done in this phase: submissions are persisted end-to-end. `forms.index` gained a "Submissions" link; public `Fill` shows a `_form` error on rate-limit rejection. Note: test rollback is broken on this MySQL setup (per-test data persists within a run — AGENTS.md gotcha); `SubmissionTest` scopes queries by `form_id` to stay robust.
+
+### Phase 13 — AI Form Generation ✅
+- [x] Queue job (`App\Jobs\GenerateFormJob`, `$tries=3` + backoff, status transitions, `failed()` logs error)
+- [x] AI service (`App\Services\AiService` — dispatch + process pipeline)
+- [x] Provider interface (`App\AI\Providers\ProviderInterface`; `OpenAIProvider` via Laravel Http, JSON mode)
+- [x] Prompt builder (`App\Support\AiPromptBuilder` — schema contract in user prompt)
+- [x] Schema validator (`App\Support\SchemaValidator` — validate + repair: strips markdown fences/trailing commas, normalizes steps/sections/fields, slug + dedupes keys)
+- [x] Retry logic (job `$tries`/`$backoff`; queue-level)
+- [x] Store logs (`ai_jobs` row: prompt/response/model/status/error_message)
+- [x] Non-blocking (queued; route `/forms/{form}/ai` polls progress via `wire:poll.2s`)
+- [x] Tests: `tests/Feature/AiGenerationTest` (4 tests, FakeProvider swapped via `services.ai.provider` config)
+
+Done in this phase: AI generation is fully queued and non-blocking. Provider is config-driven (class name in `config/services.php`, env `AI_PROVIDER`/`AI_MODEL`/`OPENAI_API_KEY`/`OPENAI_URL` added to `.env.example`). No new Composer deps (built-in HTTP client). `forms.index` gained an "AI" link. A generated schema is saved to the form via `FormService::autosave` when the job completes.
 
 ### Phase 14 — AI Editing
 - [ ] Add/remove section & field, translate labels, change validation, return diff

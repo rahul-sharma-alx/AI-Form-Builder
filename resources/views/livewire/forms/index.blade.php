@@ -67,6 +67,18 @@
 
                     </a>
 
+                    <a href="{{ route('forms.submissions',$form) }}">
+
+                        Submissions
+
+                    </a>
+
+                    <a href="{{ route('forms.ai',$form) }}">
+
+                        AI
+
+                    </a>
+
                     <button
                         wire:click="delete({{ $form->id }})"
                         wire:confirm="Delete this form permanently?"

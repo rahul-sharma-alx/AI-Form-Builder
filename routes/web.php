@@ -5,11 +5,15 @@ use App\Livewire\Forms\Index;
 use App\Livewire\Forms\Create;
 use App\Livewire\Forms\Builder;
 use App\Livewire\Public\Fill;
+use App\Livewire\Submissions\Index as Submissions;
+use App\Livewire\Ai\Generate as AiGenerate;
 
 Route::get('/', fn () => redirect()->route('forms.index'));
 
 Route::get('/forms', Index::class)->name('forms.index');
 Route::get('/forms/create', Create::class)->name('forms.create');
 Route::get('/forms/{form}/builder', Builder::class)->name('forms.builder');
+Route::get('/forms/{form}/submissions', Submissions::class)->name('forms.submissions');
+Route::get('/forms/{form}/ai', AiGenerate::class)->name('forms.ai');
 Route::get('/forms/{form}/public', Fill::class)->name('forms.public');
 Route::delete('/forms/{form}', Index::class)->name('forms.destroy');

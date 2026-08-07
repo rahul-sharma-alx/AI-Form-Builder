@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: edunett-assess
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /forms
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: edunett-assess-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: edunett-assess-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: edunett-assess-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: edunett-assess-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: edunett-assess-db
+          property: password
+      # sync = queued jobs run inline (no worker needed on free tier).
+      # For non-blocking AI generation, switch to `database` and add a worker service.
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: OPENAI_API_KEY
+        sync: false
+
+databases:
+  - name: edunett-assess-db
+    plan: free

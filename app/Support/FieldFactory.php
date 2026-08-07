@@ -27,7 +27,7 @@ class FieldFactory
        ];
     }
 
-    private static function generateKey(string $label, string $uuid): string
+    public static function generateKey(string $label, string $uuid): string
     {
         $base = Str::slug($label, '_');
 

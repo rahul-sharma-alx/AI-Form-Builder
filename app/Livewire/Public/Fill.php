@@ -2,13 +2,17 @@
 
 namespace App\Livewire\Public;
 
-use Livewire\Component;
 use App\Models\Form;
+use App\Services\SubmissionService;
+use App\Support\SchemaFields;
+use Livewire\Component;
 
 class Fill extends Component
 {
     public Form $form;
+
     public array $answers = [];
+
     public bool $submitted = false;
 
     public function mount(Form $form)
@@ -37,20 +41,20 @@ class Fill extends Component
 
         foreach ($this->answerFields() as $key => $field) {
             if ($field['type'] === 'checkbox') {
-                $rules['answers.' . $key] = [
+                $rules['answers.'.$key] = [
                     empty($field['required']) ? 'nullable' : 'required',
                     'array',
                 ];
 
                 $values = array_column($field['options'] ?? [], 'value');
                 if ($values) {
-                    $rules['answers.' . $key . '.*'] = 'in:' . implode(',', array_map('strval', $values));
+                    $rules['answers.'.$key.'.*'] = 'in:'.implode(',', array_map('strval', $values));
                 }
 
                 continue;
             }
 
-            $rules['answers.' . $key] = $this->rulesFor($field);
+            $rules['answers.'.$key] = $this->rulesFor($field);
         }
 
         return $rules;
@@ -59,6 +63,8 @@ class Fill extends Component
     public function submit()
     {
         $this->validate();
+
+        app(SubmissionService::class)->store($this->form, $this->answers);
 
         $this->submitted = true;
     }
@@ -86,10 +92,10 @@ class Fill extends Component
             case 'rating':
                 $rules[] = 'numeric';
                 if (isset($field['min']) && $field['min'] !== null) {
-                    $rules[] = 'min:' . $field['min'];
+                    $rules[] = 'min:'.$field['min'];
                 }
                 if (isset($field['max']) && $field['max'] !== null) {
-                    $rules[] = 'max:' . $field['max'];
+                    $rules[] = 'max:'.$field['max'];
                 }
                 break;
 
@@ -101,7 +107,7 @@ class Fill extends Component
             case 'radio':
                 $values = array_column($field['options'] ?? [], 'value');
                 if ($values) {
-                    $rules[] = 'in:' . implode(',', array_map('strval', $values));
+                    $rules[] = 'in:'.implode(',', array_map('strval', $values));
                 }
                 break;
 
@@ -110,15 +116,15 @@ class Fill extends Component
         }
 
         if (! empty($field['regex']) && in_array($field['type'], ['text', 'textarea', 'email', 'phone'], true)) {
-            $rules[] = 'regex:' . $field['regex'];
+            $rules[] = 'regex:'.$field['regex'];
         }
 
         if (in_array($field['type'], ['text', 'textarea'], true)) {
             if (isset($field['min']) && $field['min'] !== null) {
-                $rules[] = 'min:' . $field['min'];
+                $rules[] = 'min:'.$field['min'];
             }
             if (isset($field['max']) && $field['max'] !== null) {
-                $rules[] = 'max:' . $field['max'];
+                $rules[] = 'max:'.$field['max'];
             }
         }
 
@@ -152,21 +158,7 @@ class Fill extends Component
 
     protected function answerFields(): array
     {
-        $fields = [];
-
-        foreach ($this->steps() as $step) {
-            foreach ($step['sections'] ?? [] as $section) {
-                foreach ($section['fields'] ?? [] as $field) {
-                    if (in_array($field['type'], ['heading', 'section', 'file'], true)) {
-                        continue;
-                    }
-
-                    $fields[$field['key']] = $field;
-                }
-            }
-        }
-
-        return $fields;
+        return SchemaFields::answerable($this->form->schema);
     }
 
     public function render()

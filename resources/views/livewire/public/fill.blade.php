@@ -172,6 +172,9 @@
                 @endforeach
 
                 <div class="px-6 py-4 border-t">
+                    @error('_form')
+                        <p class="text-sm text-red-600 mb-2">{{ $message }}</p>
+                    @enderror
                     <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded font-semibold">
                         Submit
                     </button>
