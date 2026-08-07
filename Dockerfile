@@ -20,7 +20,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
-        libzip-dev libonig-dev libxml2-dev zlib1g-dev unzip git \
+        libzip-dev libonig-dev libxml2-dev libpq-dev zlib1g-dev unzip git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" gd zip mbstring bcmath pdo_mysql pdo_pgsql \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
