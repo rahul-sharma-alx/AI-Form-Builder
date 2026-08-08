@@ -1,19 +1,19 @@
 <div>
 
-    <h2 class="font-bold mb-4">
+    <h2 class="mb-4 font-bold">
         Fields
     </h2>
 
-    @foreach($fieldTypes as $type)
-
-        <button
-            wire:click="add('{{ $type }}')"
-            wire:key="palette-{{ $type }}"
-            class="w-full mb-2 p-2 bg-gray-100 rounded text-left capitalize hover:bg-gray-200"
-        >
-            {{ $type }}
-        </button>
-
-    @endforeach
+    <div class="grid grid-cols-2 gap-2">
+        @foreach($fieldTypes as $type)
+            <button
+                wire:click="add('{{ $type }}')"
+                wire:key="palette-{{ $type }}"
+                class="btn btn-outline h-auto px-2 py-2 text-xs capitalize"
+            >
+                {{ $type }}
+            </button>
+        @endforeach
+    </div>
 
 </div>

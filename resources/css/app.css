@@ -1,3 +1,114 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --background: 167 85% 97%;
+    --foreground: 176 61% 19%;
+    --card: 0 0% 100%;
+    --card-foreground: 176 61% 19%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 176 61% 19%;
+    --primary: 174 84% 32%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 196 38% 93%;
+    --secondary-foreground: 176 61% 19%;
+    --muted: 196 38% 93%;
+    --muted-foreground: 176 30% 42%;
+    --accent: 174 60% 90%;
+    --accent-foreground: 174 84% 25%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 174 45% 84%;
+    --input: 174 45% 80%;
+    --ring: 174 84% 32%;
+    --radius: 0.625rem;
+}
+
+.dark {
+    --background: 220 13% 8%;
+    --foreground: 220 13% 92%;
+    --card: 220 13% 11%;
+    --card-foreground: 220 13% 92%;
+    --popover: 220 13% 11%;
+    --popover-foreground: 220 13% 92%;
+    --primary: 174 84% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 10% 18%;
+    --secondary-foreground: 220 13% 92%;
+    --muted: 220 10% 17%;
+    --muted-foreground: 220 9% 62%;
+    --accent: 220 10% 21%;
+    --accent-foreground: 220 13% 92%;
+    --destructive: 0 64% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 10% 20%;
+    --input: 220 10% 24%;
+    --ring: 174 84% 46%;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground antialiased;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-transparent text-sm font-medium transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 h-9 px-4;
+    }
+    .btn-primary {
+        @apply bg-primary text-primary-foreground hover:bg-primary/90;
+    }
+    .btn-secondary {
+        @apply bg-secondary text-secondary-foreground hover:bg-secondary/70;
+    }
+    .btn-outline {
+        @apply border border-input bg-card hover:bg-accent hover:text-accent-foreground;
+    }
+    .btn-ghost {
+        @apply hover:bg-accent hover:text-accent-foreground;
+    }
+    .btn-danger {
+        @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+    }
+    .btn-link {
+        @apply text-primary underline-offset-4 hover:underline;
+    }
+    .btn-sm {
+        @apply h-8 px-3 text-xs;
+    }
+    .btn-lg {
+        @apply h-11 px-5 text-base;
+    }
+    .btn-icon {
+        @apply h-9 w-9 p-0;
+    }
+
+    .card {
+        @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+    }
+
+    .panel {
+        @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+    }
+
+    .input {
+        @apply flex h-9 w-full rounded-md border border-input bg-card px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    .label {
+        @apply mb-1.5 block text-sm font-medium text-foreground;
+    }
+
+    .table-hd {
+        @apply text-left text-xs font-medium uppercase tracking-wide text-muted-foreground;
+    }
+}

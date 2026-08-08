@@ -4,7 +4,9 @@ namespace App\Livewire\Public;
 
 use App\Models\Form;
 use App\Services\SubmissionService;
+use App\Support\SchemaConditions;
 use App\Support\SchemaFields;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 class Fill extends Component
@@ -40,6 +42,10 @@ class Fill extends Component
         $rules = [];
 
         foreach ($this->answerFields() as $key => $field) {
+            if (! SchemaConditions::visible($field['visibility'] ?? null, $this->answers)) {
+                continue;
+            }
+
             if ($field['type'] === 'checkbox') {
                 $rules['answers.'.$key] = [
                     empty($field['required']) ? 'nullable' : 'required',
@@ -64,7 +70,15 @@ class Fill extends Component
     {
         $this->validate();
 
-        app(SubmissionService::class)->store($this->form, $this->answers);
+        $answers = $this->answers;
+
+        foreach ($this->answerFields() as $key => $field) {
+            if (! SchemaConditions::visible($field['visibility'] ?? null, $answers)) {
+                unset($answers[$key]);
+            }
+        }
+
+        app(SubmissionService::class)->store($this->form, $answers);
 
         $this->submitted = true;
     }
@@ -161,6 +175,7 @@ class Fill extends Component
         return SchemaFields::answerable($this->form->schema);
     }
 
+    #[Layout('components.layouts.public')]
     public function render()
     {
         return view('livewire.public.fill');

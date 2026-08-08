@@ -1,12 +1,12 @@
 <div>
 
-    <h2 class="font-bold mb-4">
+    <h2 class="mb-4 font-bold">
         Field Properties
     </h2>
 
     @if(empty($field))
 
-        <p class="text-gray-400">
+        <p class="text-muted-foreground text-sm">
             Select a field to edit its properties.
         </p>
 
@@ -16,21 +16,21 @@
 
         {{-- Label (all types) --}}
         <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Label</label>
-            <input type="text" wire:model.live="field.label" class="w-full border p-2 rounded">
+            <label class="label">Label</label>
+            <input type="text" wire:model.live="field.label" class="input">
         </div>
 
         {{-- Help Text (all types) --}}
         <div class="mb-4">
-            <label class="block text-sm font-medium mb-1">Help Text</label>
-            <input type="text" wire:model.live="field.help" class="w-full border p-2 rounded">
+            <label class="label">Help Text</label>
+            <input type="text" wire:model.live="field.help" class="input">
         </div>
 
         {{-- Required (all types except heading/section) --}}
         @if(!in_array($type, ['heading', 'section']))
             <div class="mb-4">
-                <label class="inline-flex items-center">
-                    <input type="checkbox" wire:model.live="field.required" class="mr-2">
+                <label class="inline-flex items-center gap-2 text-sm font-medium">
+                    <input type="checkbox" wire:model.live="field.required" class="h-4 w-4 rounded border-input accent-primary">
                     Required
                 </label>
             </div>
@@ -39,74 +39,111 @@
         {{-- Default (all input types) --}}
         @if(!in_array($type, ['heading', 'section', 'file']))
             <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Default Value</label>
-                <input type="text" wire:model.live="field.default" class="w-full border p-2 rounded">
+                <label class="label">Default Value</label>
+                <input type="text" wire:model.live="field.default" class="input">
             </div>
         @endif
 
         {{-- Placeholder (text-like) --}}
         @if(in_array($type, ['text', 'textarea', 'email', 'phone', 'number']))
             <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Placeholder</label>
-                <input type="text" wire:model.live="field.placeholder" class="w-full border p-2 rounded">
+                <label class="label">Placeholder</label>
+                <input type="text" wire:model.live="field.placeholder" class="input">
             </div>
         @endif
 
         {{-- Min (number, date, rating) --}}
         @if(in_array($type, ['number', 'date', 'rating']))
             <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">
+                <label class="label">
                     @if($type === 'rating') Max Stars
                     @else Min @endif
                 </label>
-                <input type="number" wire:model.live="field.min" class="w-full border p-2 rounded">
+                <input type="number" wire:model.live="field.min" class="input">
             </div>
         @endif
 
         {{-- Max (number, date, rating) --}}
         @if(in_array($type, ['number', 'date']))
             <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Max</label>
-                <input type="number" wire:model.live="field.max" class="w-full border p-2 rounded">
+                <label class="label">Max</label>
+                <input type="number" wire:model.live="field.max" class="input">
             </div>
         @endif
 
         {{-- Regex (text-like) --}}
         @if(in_array($type, ['text', 'textarea', 'email', 'phone']))
             <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Regex Pattern</label>
-                <input type="text" wire:model.live="field.regex" placeholder="/^[a-z]+$/i" class="w-full border p-2 rounded font-mono text-sm">
+                <label class="label">Regex Pattern</label>
+                <input type="text" wire:model.live="field.regex" placeholder="/^[a-z]+$/i" class="input font-mono text-sm">
             </div>
         @endif
 
         {{-- Options (dropdown, radio, checkbox) --}}
         @if(in_array($type, ['dropdown', 'radio', 'checkbox']))
             <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Options</label>
+                <label class="label">Options</label>
 
                 @forelse($field['options'] ?? [] as $i => $opt)
-                    <div wire:key="opt-{{ $i }}" class="flex gap-2 mb-2">
-                        <input type="text" wire:model.live="field.options.{{ $i }}.label" placeholder="Label" class="border p-1 w-full rounded">
-                        <input type="text" wire:model.live="field.options.{{ $i }}.value" placeholder="Value" class="border p-1 w-full rounded">
-                        <button wire:click="removeOption({{ $i }})" class="px-2 text-red-500">×</button>
+                    <div wire:key="opt-{{ $i }}" class="mb-2 flex gap-2">
+                        <input type="text" wire:model.live="field.options.{{ $i }}.label" placeholder="Label" class="input flex-1">
+                        <input type="text" wire:model.live="field.options.{{ $i }}.value" placeholder="Value" class="input flex-1">
+                        <button wire:click="removeOption({{ $i }})" class="btn btn-ghost btn-icon text-destructive">×</button>
                     </div>
                 @empty
-                    <p class="text-xs text-gray-400 mb-2">No options yet.</p>
+                    <p class="mb-2 text-xs text-muted-foreground">No options yet.</p>
                 @endforelse
 
-                <button wire:click="addOption" class="text-sm text-blue-600">+ Add Option</button>
+                <button wire:click="addOption" class="btn-link text-sm">+ Add Option</button>
             </div>
         @endif
 
         {{-- Validation (all input types) --}}
         @if(!in_array($type, ['heading', 'section']))
             <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Validation Rules</label>
-                <input type="text" wire:model.live="field.validation" placeholder="min:5|max:100" class="w-full border p-2 rounded font-mono text-sm">
-                <p class="text-xs text-gray-400 mt-1">Laravel validation rule string.</p>
+                <label class="label">Validation Rules</label>
+                <input type="text" wire:model.live="field.validation" placeholder="min:5|max:100" class="input font-mono text-sm">
+                <p class="mt-1 text-xs text-muted-foreground">Laravel validation rule string.</p>
                 @if($validationError)
-                    <p class="text-xs text-red-600 mt-1">Invalid rule: {{ $validationError }}</p>
+                    <p class="mt-1 text-xs text-destructive">Invalid rule: {{ $validationError }}</p>
+        {{-- Conditional visibility (answerable types) --}}
+        @if(!in_array($type, ['heading', 'section', 'file']))
+            <div class="mb-4">
+                <label class="inline-flex items-center gap-2 text-sm font-medium">
+                    <input type="checkbox" wire:model="visibilityEnabled" class="h-4 w-4 rounded border-input accent-primary">
+                    Show conditionally
+                </label>
+                <p class="mt-1 text-xs text-muted-foreground">Only show this field when another field matches a rule.</p>
+
+                @if(!empty($field['visibility']))
+                    <div class="mt-3 space-y-2 text-sm">
+                        <select wire:model.live="field.visibility.field" class="input">
+                            @foreach($candidateFields as $candidate)
+                                <option value="{{ $candidate['key'] }}">{{ $candidate['label'] }}</option>
+                            @endforeach
+                        </select>
+
+                        <select wire:model.live="field.visibility.op" class="input">
+                            <option value="equals">is equal to</option>
+                            <option value="not_equals">is not equal to</option>
+                            <option value="empty">is empty</option>
+                            <option value="not_empty">is not empty</option>
+                        </select>
+
+                        @if(in_array($field['visibility']['op'] ?? '', ['equals', 'not_equals']))
+                            <input
+                                type="text"
+                                wire:model.live="field.visibility.value"
+                                placeholder="Value"
+                                class="input"
+                            >
+                        @endif
+                    </div>
                 @endif
+            </div>
+        @endif
+
+    @endif
             </div>
         @endif
 

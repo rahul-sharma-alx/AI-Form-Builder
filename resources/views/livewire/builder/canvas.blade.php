@@ -11,18 +11,16 @@
                 >
                     <button
                         wire:click="selectStep('{{ $step['id'] }}')"
-                        class="px-3 py-1 rounded text-sm font-medium
+                        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-fast
                             {{ $currentStepId === $step['id']
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-200 hover:bg-gray-300' }}">
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground' }}">
                         {{ $step['title'] }}
                     </button>
                 </div>
             @endforeach
         </div>
-        <button wire:click="addStep" class="px-3 py-1 bg-gray-100 border rounded text-sm">
-            + Step
-        </button>
+        <button wire:click="addStep" class="btn btn-ghost btn-sm">+ Step</button>
     </div>
 
     {{-- Find current step --}}
@@ -49,18 +47,16 @@
                     >
                         <button
                             wire:click="selectSection('{{ $section['id'] }}')"
-                            class="px-3 py-1 rounded text-sm
+                            class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-fast
                                 {{ $currentSectionId === $section['id']
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-200 hover:bg-gray-300' }}">
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground' }}">
                             {{ $section['title'] }}
                         </button>
                     </div>
                 @endforeach
             </div>
-            <button wire:click="addSection" class="px-3 py-1 bg-gray-100 border rounded text-sm">
-                + Section
-            </button>
+            <button wire:click="addSection" class="btn btn-ghost btn-sm">+ Section</button>
         </div>
 
         {{-- Find current section fields --}}
@@ -84,26 +80,26 @@
                     data-id="{{ $field['id'] }}"
                     wire:key="field-{{ $field['id'] }}"
                     wire:click="select('{{ $field['id'] }}')"
-                    class="border rounded p-3 mb-3 cursor-pointer
+                    class="cursor-pointer rounded-md border p-3 transition-colors duration-fast
                         {{ $selectedFieldId === $field['id']
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-300' }}">
+                            ? 'border-primary bg-accent/50 ring-1 ring-primary/40'
+                            : 'border-border hover:border-primary/50' }}">
 
                     <strong>{{ $field['label'] ?? $field['key'] ?? 'Untitled' }}</strong>
 
-                    <div class="text-gray-500">
+                    <div class="text-sm text-muted-foreground capitalize">
                         {{ $field['type'] ?? 'unknown' }}
                     </div>
 
                     @if(!empty($field['placeholder']))
-                        <div class="text-xs text-gray-400 mt-1">
+                        <div class="text-xs text-muted-foreground mt-1">
                             Placeholder:
                             {{ $field['placeholder'] }}
                         </div>
                     @endif
 
                     @if($field['required'])
-                        <span class="inline-block mt-2 px-2 py-1 bg-red-100 text-red-600 rounded text-xs">
+                        <span class="mt-2 inline-block rounded bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
                             Required
                         </span>
                     @endif
@@ -111,23 +107,23 @@
                     <div class="mt-3 flex gap-2">
                         <button
                             wire:click.stop="duplicate('{{ $field['id'] }}')"
-                            class="px-2 py-1 bg-blue-500 text-white rounded text-sm">
+                            class="btn btn-secondary btn-sm">
                             Duplicate
                         </button>
                         <button
                             wire:click.stop="delete('{{ $field['id'] }}')"
-                            class="px-2 py-1 bg-red-500 text-white rounded text-sm">
+                            class="btn btn-danger btn-sm">
                             Delete
                         </button>
                     </div>
                 </div>
             @empty
-                <p class="text-gray-400">No fields yet. Click a field type on the left to add.</p>
+                <p class="py-6 text-center text-sm text-muted-foreground">No fields yet. Click a field type on the left to add.</p>
             @endforelse
         </div>
 
     @else
-        <p class="text-gray-400">No steps found. Add a step to get started.</p>
+        <p class="text-muted-foreground">No steps found. Add a step to get started.</p>
     @endif
 
     @script

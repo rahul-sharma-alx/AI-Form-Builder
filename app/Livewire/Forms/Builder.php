@@ -26,6 +26,9 @@ class Builder extends Component
     public int $version = 1;
     public bool $dirty = false;
     public string $savedAt = '';
+    public array $undoStack = [];
+    public array $redoStack = [];
+    public bool $restoringHistory = false;
 
     public function boot(FormService $forms): void
     {
@@ -55,6 +58,34 @@ class Builder extends Component
         $this->dirty = false;
         $this->version = (int) $this->form->version;
         $this->savedAt = Carbon::parse($this->form->last_saved_at)->format('H:i:s');
+    }
+
+    public function undo(): void
+    {
+        if (empty($this->undoStack)) {
+            return;
+        }
+
+        $this->redoStack[] = $this->schema;
+        $this->restoringHistory = true;
+        $this->schema = array_pop($this->undoStack);
+        $this->restoringHistory = false;
+
+        $this->resetView();
+    }
+
+    public function redo(): void
+    {
+        if (empty($this->redoStack)) {
+            return;
+        }
+
+        $this->undoStack[] = $this->schema;
+        $this->restoringHistory = true;
+        $this->schema = array_pop($this->redoStack);
+        $this->restoringHistory = false;
+
+        $this->resetView();
     }
 
     public function publish()
@@ -91,6 +122,48 @@ class Builder extends Component
     {
         $this->dirty = true;
         $this->dispatch('content-dirty');
+    }
+
+    private function snapshotForUndo(): void
+    {
+        if ($this->restoringHistory) {
+            return;
+        }
+
+        $this->undoStack[] = $this->schema;
+        if (count($this->undoStack) > 50) {
+            array_shift($this->undoStack);
+        }
+        $this->redoStack = [];
+    }
+
+    private function resetView(): void
+    {
+        $this->currentStepId = $this->schema['steps'][0]['id'] ?? null;
+        $this->currentSectionId = $this->schema['steps'][0]['sections'][0]['id'] ?? null;
+        $this->selectedFieldId = null;
+        $this->selectedField = [];
+        $this->dispatch('field-selected', field: null, fields: $this->candidateFields());
+        $this->markDirty();
+    }
+
+    public function candidateFields(): array
+    {
+        $fields = [];
+
+        foreach ($this->schema['steps'] ?? [] as $step) {
+            foreach ($step['sections'] ?? [] as $section) {
+                foreach ($section['fields'] ?? [] as $field) {
+                    if (in_array($field['type'], ['heading', 'section', 'file'], true)) {
+                        continue;
+                    }
+
+                    $fields[] = ['key' => $field['key'], 'label' => $field['label']];
+                }
+            }
+        }
+
+        return $fields;
     }
 
     private function normalizeSchema(array $schema): array
@@ -150,6 +223,8 @@ class Builder extends Component
     #[On('step-add')]
     public function addStep()
     {
+        $this->snapshotForUndo();
+
         $stepId = Str::uuid()->toString();
 
         $this->schema['steps'][] = [
@@ -181,6 +256,8 @@ class Builder extends Component
     #[On('section-add')]
     public function addSection()
     {
+        $this->snapshotForUndo();
+
         [$stepIndex] = $this->locate($this->currentStepId, $this->currentSectionId);
 
         $sectionId = Str::uuid()->toString();
@@ -201,6 +278,8 @@ class Builder extends Component
     #[On('field-add')]
     public function addField(string $type)
     {
+        $this->snapshotForUndo();
+
         [$stepIndex, $sectionIndex] = $this->locate($this->currentStepId, $this->currentSectionId);
 
         $field = FieldFactory::make($type);
@@ -209,7 +288,7 @@ class Builder extends Component
 
         $this->selectedFieldId = $field['id'];
         $this->selectedField = $field;
-        $this->dispatch('field-selected', field: $field);
+        $this->dispatch('field-selected', field: $field, fields: $this->candidateFields());
 
         $this->markDirty();
     }
@@ -225,7 +304,7 @@ class Builder extends Component
                         $this->selectedField = $field;
                         $this->currentStepId = $step['id'];
                         $this->currentSectionId = $section['id'];
-                        $this->dispatch('field-selected', field: $field);
+                        $this->dispatch('field-selected', field: $field, fields: $this->candidateFields());
                         return;
                     }
                 }
@@ -236,6 +315,8 @@ class Builder extends Component
     #[On('field-update')]
     public function updateField(array $field)
     {
+        $this->snapshotForUndo();
+
         $this->selectedField = $field;
 
         foreach ($this->schema['steps'] as &$step) {
@@ -254,6 +335,8 @@ class Builder extends Component
     #[On('field-duplicate')]
     public function duplicateField(string $id)
     {
+        $this->snapshotForUndo();
+
         foreach ($this->schema['steps'] as &$step) {
             foreach ($step['sections'] as &$section) {
                 foreach ($section['fields'] as $index => $field) {
@@ -272,6 +355,8 @@ class Builder extends Component
     #[On('field-delete')]
     public function deleteField(string $id)
     {
+        $this->snapshotForUndo();
+
         foreach ($this->schema['steps'] as &$step) {
             foreach ($step['sections'] as &$section) {
                 foreach ($section['fields'] as $index => $field) {
@@ -281,7 +366,7 @@ class Builder extends Component
                         if ($this->selectedFieldId === $id) {
                             $this->selectedFieldId = null;
                             $this->selectedField = [];
-                            $this->dispatch('field-selected', field: null);
+                            $this->dispatch('field-selected', field: null, fields: $this->candidateFields());
                         }
                         $this->markDirty();
                         return;
@@ -294,6 +379,8 @@ class Builder extends Component
     #[On('steps-reorder')]
     public function reorderSteps(array $ids)
     {
+        $this->snapshotForUndo();
+
         $this->schema['steps'] = $this->reorderByIds($this->schema['steps'], $ids);
         $this->markDirty();
     }
@@ -301,6 +388,8 @@ class Builder extends Component
     #[On('sections-reorder')]
     public function reorderSections(array $ids)
     {
+        $this->snapshotForUndo();
+
         foreach ($this->schema['steps'] as &$step) {
             if ($step['id'] === $this->currentStepId) {
                 $step['sections'] = $this->reorderByIds($step['sections'], $ids);
@@ -313,6 +402,8 @@ class Builder extends Component
     #[On('fields-reorder')]
     public function reorderFields(array $ids)
     {
+        $this->snapshotForUndo();
+
         foreach ($this->schema['steps'] as &$step) {
             foreach ($step['sections'] as &$section) {
                 if ($section['id'] === $this->currentSectionId) {
@@ -349,6 +440,8 @@ class Builder extends Component
     #[On('schema-replace')]
     public function replaceSchema(array $schema)
     {
+        $this->snapshotForUndo();
+
         $this->schema = $this->normalizeSchema($schema);
 
         $this->currentStepId = $this->schema['steps'][0]['id'] ?? null;
@@ -358,7 +451,7 @@ class Builder extends Component
         $this->selectedFieldId = null;
         $this->selectedField = [];
 
-        $this->dispatch('field-selected', field: null);
+        $this->dispatch('field-selected', field: null, fields: $this->candidateFields());
 
         $this->markDirty();
     }

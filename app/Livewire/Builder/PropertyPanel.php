@@ -9,6 +9,8 @@ use App\Support\ValidationRules;
 class PropertyPanel extends Component
 {
     public array $field = [];
+    public array $candidateFields = [];
+    public bool $visibilityEnabled = false;
     public ?string $lastValidValidation = null;
     public string $validationError = '';
 
@@ -44,11 +46,28 @@ class PropertyPanel extends Component
     }
 
     #[On('field-selected')]
-    public function onFieldSelected(?array $field)
+    public function onFieldSelected(?array $field, array $fields = [])
     {
         $this->field = $field ?? [];
+        $this->candidateFields = $fields;
+        $this->visibilityEnabled = isset($this->field['visibility']);
         $this->lastValidValidation = $this->validationString();
         $this->validationError = '';
+    }
+
+    public function updatedVisibilityEnabled(bool $enabled)
+    {
+        if ($enabled) {
+            $this->field['visibility'] = $this->field['visibility'] ?? [
+                'field' => $this->candidateFields[0]['key'] ?? '',
+                'op' => 'equals',
+                'value' => '',
+            ];
+        } else {
+            unset($this->field['visibility']);
+        }
+
+        $this->updatedField();
     }
 
     public function addOption()

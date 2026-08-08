@@ -1,17 +1,15 @@
 <div>
 
-    <div class="flex justify-between items-start mb-6">
+    <div class="flex flex-wrap justify-between items-start gap-3 mb-6">
 
         <div>
-            <a href="{{ route('forms.builder', $form) }}" class="text-sm text-blue-600">&larr; Back to builder</a>
-            <h1 class="text-3xl font-bold mt-1">Submissions</h1>
-            <p class="text-gray-500">{{ $form->title }}</p>
+            <a href="{{ route('forms.builder', $form) }}" class="btn-link text-sm">&larr; Back to builder</a>
+            <h1 class="mt-2 text-2xl font-bold tracking-tight">Submissions</h1>
+            <p class="text-sm text-muted-foreground">{{ $form->title }}</p>
         </div>
 
-        <button
-            wire:click="export"
-            class="bg-green-600 text-white px-4 py-2 rounded"
-        >
+        <button wire:click="export" class="btn btn-primary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
             Export CSV
         </button>
 
@@ -22,30 +20,30 @@
             type="search"
             wire:model.live.debounce.300ms="search"
             placeholder="Search submissions..."
-            class="border rounded px-3 py-2 w-64"
+            class="input w-64"
         >
     </div>
 
     @if(session()->has('success'))
-        <div class="mb-4 text-green-600">{{ session('success') }}</div>
+        <div class="mb-4 rounded-md border border-border bg-card px-4 py-3 text-sm text-emerald-600" role="alert">{{ session('success') }}</div>
     @endif
 
-    <div class="overflow-x-auto bg-white">
-        <table class="w-full">
+    <div class="panel overflow-x-auto">
+        <table class="w-full text-sm">
             <thead>
-            <tr class="text-left">
-                <th class="px-3 py-2">Submitted</th>
-                <th class="px-3 py-2">IP Address</th>
+            <tr class="border-b border-border bg-muted/40">
+                <th class="table-hd px-3 py-3">Submitted</th>
+                <th class="table-hd px-3 py-3">IP Address</th>
                 @foreach($fields as $field)
-                    <th class="px-3 py-2">{{ $field['label'] ?? $field['key'] }}</th>
+                    <th class="table-hd px-3 py-3">{{ $field['label'] ?? $field['key'] }}</th>
                 @endforeach
             </tr>
             </thead>
             <tbody>
             @forelse($submissions as $submission)
-                <tr class="border-t">
+                <tr class="border-b border-border last:border-0 transition-colors duration-fast hover:bg-accent/40">
                     <td class="px-3 py-2 whitespace-nowrap">{{ $submission->created_at?->diffForHumans() }}</td>
-                    <td class="px-3 py-2">{{ $submission->ip_address }}</td>
+                    <td class="px-3 py-2 text-muted-foreground">{{ $submission->ip_address }}</td>
                     @foreach($fields as $key => $field)
                         @php
                             $value = $submission->data[$key] ?? '';
@@ -55,7 +53,7 @@
                     @endforeach
                 </tr>
             @empty
-                <tr><td colspan="{{ count($fields) + 2 }}" class="text-center text-gray-500 py-6">No submissions yet.</td></tr>
+                <tr><td colspan="{{ count($fields) + 2 }}" class="px-3 py-6 text-center text-muted-foreground">No submissions yet.</td></tr>
             @endforelse
             </tbody>
         </table>

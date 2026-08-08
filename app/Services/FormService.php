@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Form;
+use App\Models\FormVersion;
 use App\Support\ValidationRules;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -85,6 +86,7 @@ class FormService
 
         if ($schemaChanged) {
             $form->bumpVersion();
+            $this->recordVersion($form, $schema);
         }
 
         $form->last_saved_at = Carbon::now();
@@ -95,6 +97,37 @@ class FormService
         }
 
         return $form;
+    }
+
+    public function rollback(Form $form, FormVersion $version): Form
+    {
+        $form->schema = $version->schema ?? $form->schema;
+        $form->bumpVersion();
+        $this->recordVersion($form, $form->schema);
+        $form->last_saved_at = Carbon::now();
+        $form->save();
+
+        return $form;
+    }
+
+    protected function recordVersion(Form $form, array $schema): void
+    {
+        if (! $form->exists) {
+            return;
+        }
+
+        FormVersion::create([
+            'form_id' => $form->id,
+            'version' => (int) $form->version,
+            'schema' => $schema,
+        ]);
+
+        FormVersion::where('form_id', $form->id)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get()
+            ->slice(25)
+            ->each->delete();
     }
 
     protected function sanitizeSchema(array $schema): array

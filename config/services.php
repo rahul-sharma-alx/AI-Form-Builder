@@ -38,4 +38,16 @@ return [
         'url' => env('OPENAI_URL', 'https://api.openai.com/v1/chat/completions'),
     ],
 
+    'openrouter' => [
+        'api_key' => env('OPENROUTER_API_KEY'),
+        'url' => env('OPENROUTER_URL', 'https://openrouter.ai/api/v1/chat/completions'),
+        'http_referer' => env('OPENROUTER_HTTP_REFERER'),
+        'site_title' => env('OPENROUTER_SITE_TITLE'),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/models'),
+    ],
+
 ];

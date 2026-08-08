@@ -58,6 +58,11 @@ class Form extends Model
         return $this->hasMany(AIJob::class);
     }
 
+    public function formVersions()
+    {
+        return $this->hasMany(FormVersion::class);
+    }
+
     public function isDraft(): bool
     {
         return $this->status === 'draft';

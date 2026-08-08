@@ -8,11 +8,17 @@ class AiJob extends Model
 {
     protected $fillable = [
         'form_id',
+        'kind',
         'prompt',
         'response',
+        'diff',
         'model',
         'status',
         'error_message',
+    ];
+
+    protected $casts = [
+        'diff' => 'array',
     ];
 
     public function form()

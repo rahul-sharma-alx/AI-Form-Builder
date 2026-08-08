@@ -132,19 +132,59 @@ Done in this phase: submissions are persisted end-to-end. `forms.index` gained a
 
 Done in this phase: AI generation is fully queued and non-blocking. Provider is config-driven (class name in `config/services.php`, env `AI_PROVIDER`/`AI_MODEL`/`OPENAI_API_KEY`/`OPENAI_URL` added to `.env.example`). No new Composer deps (built-in HTTP client). `forms.index` gained an "AI" link. A generated schema is saved to the form via `FormService::autosave` when the job completes.
 
-### Phase 14 — AI Editing
-- [ ] Add/remove section & field, translate labels, change validation, return diff
+### Phase 13.5 — OpenRouter provider ✅
+- [x] `App\AI\Providers\OpenRouterProvider` (OpenAI-compatible gateway; same chat-completions shape, `services.openrouter.*` config, sends `HTTP-Referer`/`X-Title`). No `response_format` — the model catalog varies and `SchemaValidator` repairs output anyway.
+- [x] `config/services.php` `openrouter` block; `.env.example` + `.env` vars (`AI_PROVIDER=App\AI\Providers\OpenRouterProvider`, `AI_MODEL=openai/gpt-4o-mini`, `OPENROUTER_API_KEY=…`)
+- [x] Tests: `tests/Feature/OpenRouterProviderTest` (fake HTTP — URL, auth header, body; throws on missing content)
 
-### Phase 15 — DOCX Import
-- [ ] PHPWord extraction (headings, questions, checkboxes, options)
-- [ ] Preview screen, editable mapping, queue large files
+### Phase 14 — AI Editing ✅
+- [x] Edit queue job (`App\Jobs\EditSchemaJob`, mirrors GenerateFormJob)
+- [x] Non-blocking: queued edit, route `/forms/{form}/ai/edit` polls progress via `wire:poll.2s`
+- [x] Never regenerates schema — prompt passes existing schema, instructs in-place modification preserving `id`/`key`
+- [x] Modify existing JSON (add/remove section & field, translate labels, change validation — all via instruction)
+- [x] Return diff (`App\Support\SchemaDiff` — added/removed/modified steps/sections/fields + summary; stored on `ai_jobs.diff`)
+- [x] Review screen: edits NOT auto-saved; user reviews diff and clicks Apply (saves via `FormService::autosave`)
+- [x] Provider/validation/repair reused from Phase 13 (`AiService::provider`, `SchemaValidator`)
+- [x] Migration: `kind` + `diff` columns on `ai_jobs`
+- [x] Tests: `tests/Feature/AiEditTest` (4 tests)
 
-### Phase 16 — Excel Import
-- [ ] Laravel Excel (header row, template, preview, mapping, validation)
-- [ ] Queue imports
+Done in this phase: AI editing reuses the Phase 13 pipeline (`EditSchemaJob` → `AiService::processEdit`). Add/remove section & field, translate labels, change validation all work from a single instruction. The edit job computes a structural diff (`SchemaDiff`) and stores it (plus the validated result schema) on the job row; the Edit Livewire page shows the diff and applies on user confirmation — the schema is never auto-overwritten. `forms.index` gained an "AI Edit" link.
 
-### Phase 17 — Advanced Features
-- [ ] Undo/redo, autosave, version history, rollback
-- [ ] Conditional logic, multi-step forms
-- [ ] Template library, QR sharing, accessibility
-- [ ] Testing, Docker, CI
+### Phase 15 — DOCX Import ✅
+- [x] PHPWord extraction (`App\Support\DocxParser` — headings, questions, checkbox glyphs, table options)
+- [x] Preview screen + editable mapping (`App\Livewire\Imports\Docx` — edit labels, field type, options; add/remove rows; form title)
+- [x] Queue large files (`App\Jobs\ProcessDocxImportJob` → `ImportService::processDocs`; `wire:poll.2s` progress)
+- [x] Applies to a new draft Form via `ImportService::buildForm`/`buildSchema` (headings → sections, options → dropdown/radio/checkbox)
+- [x] Migration: `form_id` FK on `imports`; `Import` model fillable/casts/relationship
+- [x] Route `/imports/docx` + "Import DOCX" button on forms index
+- [x] Tests: `tests/Feature/DocxImportTest` (4 tests, real PHPWord-written fixture)
+
+Done in this phase: upload stores the file, creates a pending `Import`, and queues the parse — nothing blocks. The parser reads real Word headings (`w:pStyle` → `Title` element), paragraphs, checkbox lines (`☐`/`[x]`/`( )`), and table rows (col 0 = question, rest = options). The preview shows an editable mapping; "Create Form" builds a schema (sections from headings, fields from questions) and creates a draft form.
+
+### Phase 16 — Excel Import ✅
+- [x] Laravel Excel (`App\Support\ExcelReader` — preview via `WithLimit`+`WithChunkReading`, full `rows()`)
+- [x] Header row (`hasHeader` toggle skips first row)
+- [x] Custom template (`ImportTemplateController` — downloadable `.xlsx` with type/label/required/placeholder/help/options/section/validation)
+- [x] Preview (15-row bounded read, letter-column table) + editable mapping (`App\Livewire\Imports\Excel`, auto-detect via `ImportService::detectMapping`)
+- [x] Validation (required file, title; at-least-one-label guard; row parsing in `ImportService::buildItemsFromRows`)
+- [x] Queue imports (`App\Jobs\ProcessExcelImportJob` → `ImportService::buildSchema`/`buildForm`; `wire:poll.2s` progress)
+- [x] Routes `/imports/xlsx` + `/imports/xlsx/template`; "Import XLSX" button on forms index
+- [x] Tests: `tests/Feature/ExcelImportTest` (6 tests) — preview bound, auto-mapping, item parsing, job→form, Livewire flow, template download
+
+Done in this phase: full upload→preview→map→queue→build pipeline. Rows become items (headings from `section` column, options from pipe-delimited `options` column), built into a new draft Form. Reuses `ImportService` schema-building shared with DOCX import.
+
+### Phase 17 — Advanced Features ✅
+- [x] Undo/redo (per-mutation schema snapshots in `Builder`; undo/redo stacks + toolbar buttons; redo cleared on new edit)
+- [x] Autosave (already existed — Phase 10)
+- [x] Version history (new `form_versions` table + `FormVersion` model; snapshot recorded on every schema change in `FormService::persist`, capped at 25; `/forms/{form}/versions` page)
+- [x] Rollback (`FormService::rollback` restores a snapshot, bumps version, records a new history entry; `Versions` page Restore buttons)
+- [x] Conditional logic (field `visibility` `{field, op, value}` with ops `equals`/`not_equals`/`empty`/`not_empty`; `SchemaConditions` helper; builder UI in `PropertyPanel` via `candidateFields` passed on `field-selected`; `Fill` skips validation of hidden fields, strips hidden answers on submit, gated rendering with `wire:model.live`)
+- [x] Multi-step forms (already existed — steps in schema + step tabs + renderer nav)
+- [x] Template library (`config/form_templates.php` — contact, event, feedback, application; `Create` page cards; falls back to blank on unknown id)
+- [x] QR sharing (share modal on forms index: copy link + QR via qrserver.com image API — zero deps)
+- [x] Accessibility (native HTML5 labels/required/patterns — inherited from Phase 11)
+- [x] Testing (new: `BuilderHistoryTest`, `TemplateLibraryTest`, `ConditionalLogicTest`; fixed stock `ExampleTest` to assert the `/` → `/forms` redirect + index render)
+- [x] Docker (already present — `Dockerfile`, `render.yaml`)
+- [x] CI (`.github/workflows/tests.yml` — PHP 8.3 + MySQL 8 service, composer install, env from `.env.example` via sed, migrate, `php artisan test`)
+
+Done in this phase: full suite is 60 tests / 214 assertions green.
