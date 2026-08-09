@@ -68,6 +68,8 @@ class Fill extends Component
 
     public function submit()
     {
+        $this->normalizeCheckboxes();
+
         $this->validate();
 
         $answers = $this->answers;
@@ -81,6 +83,28 @@ class Fill extends Component
         app(SubmissionService::class)->store($this->form, $answers);
 
         $this->submitted = true;
+    }
+
+    /**
+     * Livewire binds checkbox groups as fixed-index arrays; unchecking a box
+     * leaves a `false` element behind. Collapse those so an untouched or
+     * fully-unchecked group is a clean null instead of a false-filled array.
+     */
+    protected function normalizeCheckboxes(): void
+    {
+        foreach ($this->answerFields() as $key => $field) {
+            if ($field['type'] !== 'checkbox') {
+                continue;
+            }
+
+            $value = $this->answers[$key] ?? null;
+
+            if (is_array($value)) {
+                $value = array_values(array_filter($value, fn ($item) => $item !== false && $item !== null));
+            }
+
+            $this->answers[$key] = $value ?: null;
+        }
     }
 
     protected function rulesFor(array $field): array
@@ -103,13 +127,24 @@ class Fill extends Component
                 break;
 
             case 'number':
-            case 'rating':
                 $rules[] = 'numeric';
                 if (isset($field['min']) && $field['min'] !== null) {
                     $rules[] = 'min:'.$field['min'];
                 }
                 if (isset($field['max']) && $field['max'] !== null) {
                     $rules[] = 'max:'.$field['max'];
+                }
+                break;
+
+            case 'rating':
+                $rules[] = 'numeric';
+                $rules[] = 'min:1';
+
+                // Max stars are stored in `max` (the property panel writes it
+                // there). `min` is legacy template noise for rating.
+                $stars = $field['max'] ?? 5;
+                if ($stars !== null && $stars !== '') {
+                    $rules[] = 'max:'.(int) $stars;
                 }
                 break;
 

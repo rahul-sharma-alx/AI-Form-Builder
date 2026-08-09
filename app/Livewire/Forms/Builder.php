@@ -2,32 +2,46 @@
 
 namespace App\Livewire\Forms;
 
-use Livewire\Attributes\On;
-use Livewire\Component;
 use App\Models\Form;
 use App\Services\FormService;
 use App\Support\FieldFactory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Builder extends Component
 {
     public Form $form;
+
     public array $schema = [];
+
     public ?string $currentStepId = null;
+
     public ?string $currentSectionId = null;
+
     public ?string $selectedFieldId = null;
+
     public array $selectedField = [];
 
     public string $title = '';
+
     public ?string $description = null;
+
     public array $settings = [];
+
     public array $metadata = [];
+
     public int $version = 1;
+
     public bool $dirty = false;
+
     public string $savedAt = '';
+
     public array $undoStack = [];
+
     public array $redoStack = [];
+
     public bool $restoringHistory = false;
 
     public function boot(FormService $forms): void
@@ -154,7 +168,7 @@ class Builder extends Component
         foreach ($this->schema['steps'] ?? [] as $step) {
             foreach ($step['sections'] ?? [] as $section) {
                 foreach ($section['fields'] ?? [] as $field) {
-                    if (in_array($field['type'], ['heading', 'section', 'file'], true)) {
+                    if (in_array($field['type'], ['heading', 'section', 'html', 'file'], true)) {
                         continue;
                     }
 
@@ -170,7 +184,7 @@ class Builder extends Component
     {
         $schema['title'] = $schema['title'] ?? $this->title;
 
-        if (!empty($schema['steps'])) {
+        if (! empty($schema['steps'])) {
             return $schema;
         }
 
@@ -183,7 +197,7 @@ class Builder extends Component
                     'id' => Str::uuid()->toString(),
                     'title' => 'Section 1',
                     'fields' => [],
-                ]
+                ],
             ],
         ]];
 
@@ -215,6 +229,7 @@ class Builder extends Component
         foreach ($this->schema['steps'] as $step) {
             if ($step['id'] === $id) {
                 $this->currentSectionId = $step['sections'][0]['id'] ?? null;
+
                 return;
             }
         }
@@ -229,13 +244,13 @@ class Builder extends Component
 
         $this->schema['steps'][] = [
             'id' => $stepId,
-            'title' => 'Step ' . (count($this->schema['steps']) + 1),
+            'title' => 'Step '.(count($this->schema['steps']) + 1),
             'sections' => [
                 [
                     'id' => Str::uuid()->toString(),
                     'title' => 'Section 1',
                     'fields' => [],
-                ]
+                ],
             ],
         ];
 
@@ -266,7 +281,7 @@ class Builder extends Component
 
         $this->schema['steps'][$stepIndex]['sections'][] = [
             'id' => $sectionId,
-            'title' => 'Section ' . ($count + 1),
+            'title' => 'Section '.($count + 1),
             'fields' => [],
         ];
 
@@ -305,6 +320,7 @@ class Builder extends Component
                         $this->currentStepId = $step['id'];
                         $this->currentSectionId = $section['id'];
                         $this->dispatch('field-selected', field: $field, fields: $this->candidateFields());
+
                         return;
                     }
                 }
@@ -325,6 +341,7 @@ class Builder extends Component
                     if ($existing['id'] === $field['id']) {
                         $existing = $field;
                         $this->markDirty();
+
                         return;
                     }
                 }
@@ -345,6 +362,7 @@ class Builder extends Component
                         $copy['id'] = Str::uuid()->toString();
                         array_splice($section['fields'], $index + 1, 0, [$copy]);
                         $this->markDirty();
+
                         return;
                     }
                 }
@@ -369,6 +387,7 @@ class Builder extends Component
                             $this->dispatch('field-selected', field: null, fields: $this->candidateFields());
                         }
                         $this->markDirty();
+
                         return;
                     }
                 }
@@ -394,6 +413,7 @@ class Builder extends Component
             if ($step['id'] === $this->currentStepId) {
                 $step['sections'] = $this->reorderByIds($step['sections'], $ids);
                 $this->markDirty();
+
                 return;
             }
         }
@@ -409,6 +429,7 @@ class Builder extends Component
                 if ($section['id'] === $this->currentSectionId) {
                     $section['fields'] = $this->reorderByIds($section['fields'], $ids);
                     $this->markDirty();
+
                     return;
                 }
             }

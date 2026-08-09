@@ -50,4 +50,21 @@ class TemplateLibraryTest extends TestCase
         $form = Form::latest('id')->first();
         $this->assertCount(0, $form->schema['steps'][0]['sections'][0]['fields']);
     }
+
+    public function test_clicking_template_creates_form_and_opens_builder(): void
+    {
+        $response = Livewire::test(Create::class)
+            ->call('startFromTemplate', 'contact');
+
+        $response->assertRedirect();
+
+        $form = Form::latest('id')->first();
+        $this->assertNotNull($form);
+        $this->assertSame('Contact Form', $form->title);
+        $this->assertSame($response->effects['redirect'], route('forms.builder', $form));
+
+        $fields = $form->schema['steps'][0]['sections'][0]['fields'];
+        $this->assertCount(3, $fields);
+        $this->assertSame('email', $fields[1]['type']);
+    }
 }

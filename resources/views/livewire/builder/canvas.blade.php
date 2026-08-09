@@ -91,6 +91,10 @@
                         {{ $field['type'] ?? 'unknown' }}
                     </div>
 
+                    @if(($field['type'] ?? '') === 'html')
+                        <div class="mt-1 truncate text-xs text-muted-foreground">{!! strip_tags((string) ($field['content'] ?? '')) ?: 'HTML block — no content yet' !!}</div>
+                    @endif
+
                     @if(!empty($field['placeholder']))
                         <div class="text-xs text-muted-foreground mt-1">
                             Placeholder:

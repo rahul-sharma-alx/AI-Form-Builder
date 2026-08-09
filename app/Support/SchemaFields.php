@@ -11,7 +11,7 @@ class SchemaFields
         foreach ($schema['steps'] ?? [] as $step) {
             foreach ($step['sections'] ?? [] as $section) {
                 foreach ($section['fields'] ?? [] as $field) {
-                    if (in_array($field['type'], ['heading', 'section', 'file'], true)) {
+                    if (in_array($field['type'], ['heading', 'section', 'html', 'file'], true)) {
                         continue;
                     }
 

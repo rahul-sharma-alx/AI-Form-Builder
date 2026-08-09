@@ -90,7 +90,7 @@ class SchemaValidator
             'required' => ! empty($field['required']),
         ]);
 
-        foreach (['placeholder', 'help', 'default', 'min', 'max', 'regex', 'validation'] as $prop) {
+        foreach (['placeholder', 'help', 'default', 'min', 'max', 'regex', 'validation', 'content'] as $prop) {
             if (array_key_exists($prop, $field) && $field[$prop] !== null && $field[$prop] !== '') {
                 $normalized[$prop] = $field[$prop];
             }

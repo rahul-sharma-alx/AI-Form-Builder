@@ -33,6 +33,31 @@ class Create extends Component
         return redirect()->route('forms.builder', $form);
     }
 
+    public function startFromTemplate(string $id)
+    {
+        foreach ($this->templates() as $template) {
+            if (($template['id'] ?? null) !== $id) {
+                continue;
+            }
+
+            $name = $template['name'] ?? 'Untitled form';
+            $schema = $template['schema'] ?? null;
+
+            if (is_array($schema)) {
+                $schema['title'] = $name;
+            }
+
+            $form = Form::create([
+                'title' => $name,
+                'description' => $template['description'] ?? null,
+                'schema' => $schema ?? SchemaFactory::create($name),
+                'status' => 'draft',
+            ]);
+
+            return redirect()->route('forms.builder', $form);
+        }
+    }
+
     public function templates(): array
     {
         return config('form_templates', []);

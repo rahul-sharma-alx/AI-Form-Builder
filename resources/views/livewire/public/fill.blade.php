@@ -44,6 +44,9 @@
                                                 <h5 class="font-medium text-foreground">{{ $field['label'] }}</h5>
                                             </div>
 
+                                        @elseif($field['type'] === 'html')
+                                            <div class="html-block text-sm leading-relaxed [&_a]:text-primary [&_a]:underline">{!! $field['content'] ?? '' !!}</div>
+
                                         @else
                                             @if(\App\Support\SchemaConditions::visible($field['visibility'] ?? null, $answers))
                                             <div wire:key="f-{{ $key }}"

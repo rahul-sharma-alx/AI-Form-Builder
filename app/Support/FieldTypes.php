@@ -8,19 +8,20 @@ class FieldTypes
     {
         return [
 
-            "text",
-            "textarea",
-            "number",
-            "email",
-            "phone",
-            "date",
-            "dropdown",
-            "radio",
-            "checkbox",
-            "file",
-            "heading",
-            "rating",
-            "section",
+            'text',
+            'textarea',
+            'number',
+            'email',
+            'phone',
+            'date',
+            'dropdown',
+            'radio',
+            'checkbox',
+            'file',
+            'heading',
+            'rating',
+            'section',
+            'html',
         ];
     }
 }

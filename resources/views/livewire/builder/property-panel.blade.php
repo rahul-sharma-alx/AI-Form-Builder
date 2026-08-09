@@ -26,8 +26,22 @@
             <input type="text" wire:model.live="field.help" class="input">
         </div>
 
-        {{-- Required (all types except heading/section) --}}
-        @if(!in_array($type, ['heading', 'section']))
+        {{-- HTML Content (html type) --}}
+        @if($type === 'html')
+            <div class="mb-4">
+                <label class="label">HTML Content</label>
+                <textarea
+                    wire:model.live="field.content"
+                    rows="6"
+                    class="input py-2 font-mono text-xs"
+                    placeholder="<p>Some text</p><div>Any HTML works</div>"
+                ></textarea>
+                <p class="mt-1 text-xs text-muted-foreground">Rendered as-is on the public form — any tags like &lt;p&gt;, &lt;div&gt;, &lt;a&gt;, &lt;img&gt; work.</p>
+            </div>
+        @endif
+
+        {{-- Required (all types except heading/section/html) --}}
+        @if(!in_array($type, ['heading', 'section', 'html']))
             <div class="mb-4">
                 <label class="inline-flex items-center gap-2 text-sm font-medium">
                     <input type="checkbox" wire:model.live="field.required" class="h-4 w-4 rounded border-input accent-primary">
@@ -37,7 +51,7 @@
         @endif
 
         {{-- Default (all input types) --}}
-        @if(!in_array($type, ['heading', 'section', 'file']))
+        @if(!in_array($type, ['heading', 'section', 'html', 'file']))
             <div class="mb-4">
                 <label class="label">Default Value</label>
                 <input type="text" wire:model.live="field.default" class="input">
@@ -52,21 +66,21 @@
             </div>
         @endif
 
-        {{-- Min (number, date, rating) --}}
-        @if(in_array($type, ['number', 'date', 'rating']))
+        {{-- Min (number, date) --}}
+        @if(in_array($type, ['number', 'date']))
             <div class="mb-4">
-                <label class="label">
-                    @if($type === 'rating') Max Stars
-                    @else Min @endif
-                </label>
+                <label class="label">Min</label>
                 <input type="number" wire:model.live="field.min" class="input">
             </div>
         @endif
 
         {{-- Max (number, date, rating) --}}
-        @if(in_array($type, ['number', 'date']))
+        @if(in_array($type, ['number', 'date', 'rating']))
             <div class="mb-4">
-                <label class="label">Max</label>
+                <label class="label">
+                    @if($type === 'rating') Max Stars
+                    @else Max @endif
+                </label>
                 <input type="number" wire:model.live="field.max" class="input">
             </div>
         @endif
@@ -99,7 +113,7 @@
         @endif
 
         {{-- Validation (all input types) --}}
-        @if(!in_array($type, ['heading', 'section']))
+        @if(!in_array($type, ['heading', 'section', 'html']))
             <div class="mb-4">
                 <label class="label">Validation Rules</label>
                 <input type="text" wire:model.live="field.validation" placeholder="min:5|max:100" class="input font-mono text-sm">
@@ -107,7 +121,7 @@
                 @if($validationError)
                     <p class="mt-1 text-xs text-destructive">Invalid rule: {{ $validationError }}</p>
         {{-- Conditional visibility (answerable types) --}}
-        @if(!in_array($type, ['heading', 'section', 'file']))
+        @if(!in_array($type, ['heading', 'section', 'html', 'file']))
             <div class="mb-4">
                 <label class="inline-flex items-center gap-2 text-sm font-medium">
                     <input type="checkbox" wire:model="visibilityEnabled" class="h-4 w-4 rounded border-input accent-primary">

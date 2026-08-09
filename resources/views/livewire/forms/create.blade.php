@@ -6,7 +6,7 @@
             <p class="text-sm text-muted-foreground">Start from a template or begin with a blank form.</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button
                 type="button"
                 wire:click="$set('templateId', '')"
@@ -19,10 +19,13 @@
             @foreach($this->templates() as $template)
                 <button
                     type="button"
-                    wire:click="$set('templateId', '{{ $template['id'] }}')"
-                    class="card cursor-pointer p-4 text-left transition-colors duration-fast {{ $templateId === $template['id'] ? 'border-primary ring-2 ring-primary/30' : 'hover:border-primary/50' }}"
+                    wire:click="startFromTemplate('{{ $template['id'] }}')"
+                    class="card group cursor-pointer p-4 text-left transition-colors duration-fast hover:border-primary/50 hover:ring-2 hover:ring-primary/30"
                 >
-                    <div class="font-semibold">{{ $template['name'] }}</div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="font-semibold">{{ $template['name'] }}</div>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-fast group-hover:translate-x-0.5 group-hover:text-primary"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                    </div>
                     <div class="text-sm text-muted-foreground">{{ $template['description'] }}</div>
                 </button>
             @endforeach
