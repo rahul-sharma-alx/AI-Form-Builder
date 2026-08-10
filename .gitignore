@@ -9,6 +9,7 @@
 .opencode
 development_guide.md
 progress.md
+AGENTS.md
 .env
 .env.backup
 .env.production
