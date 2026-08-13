@@ -75,7 +75,7 @@
                     </svg>
                     Save &amp; Test Connection
                 </button>
-                <p class="mt-2 text-xs text-muted-foreground">Values are written to your <code>.env</code> file. Your current OpenRouter key is kept if you leave the API key blank.</p>
+                {{-- <p class="mt-2 text-xs text-muted-foreground">Values are written to your <code>.env</code> file. Your current OpenRouter key is kept if you leave the API key blank.</p> --}}
             </div>
         </form>
 
