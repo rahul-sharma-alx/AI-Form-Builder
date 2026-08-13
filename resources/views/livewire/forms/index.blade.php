@@ -118,7 +118,7 @@
                                     </a>
 
                                     {{-- Share --}}
-                                    <button @click="open('{{ route('forms.public', $form) }}')" class="btn btn-ghost btn-sm"
+                                    <button @click="openShare('{{ route('forms.public', $form) }}')" class="btn btn-ghost btn-sm"
                                         title="Share Form" aria-label="Share Form">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -190,7 +190,7 @@
                 open: false,
                 url: '',
 
-                open(url) {
+                openShare(url) {
                     this.url = url;
                     this.open = true;
                 },
