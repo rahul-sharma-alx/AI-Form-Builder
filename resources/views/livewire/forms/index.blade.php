@@ -19,7 +19,9 @@
         </div>
     </div>
 
-    <div class="mb-4 flex items-center gap-2">
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+        <input type="search" wire:model.live="search" placeholder="Search forms..."
+            class="input w-full max-w-xs" aria-label="Search forms">
         <label for="status-filter" class="text-sm font-medium text-muted-foreground">Filter</label>
         <select id="status-filter" wire:model.live="status" class="input w-auto">
             <option value="all">All</option>

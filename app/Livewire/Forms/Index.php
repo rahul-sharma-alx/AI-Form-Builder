@@ -11,6 +11,12 @@ class Index extends Component
     use WithPagination;
 
     public string $status = 'all';
+    public string $search = '';
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
 
     public function delete(Form $form)
     {
@@ -20,7 +26,8 @@ class Index extends Component
 
     public function render()
     {
-        $forms = Form::query();
+        $forms = Form::query()
+            ->when($this->search !== '', fn ($q) => $q->where('title', 'like', "%{$this->search}%"));
 
         if ($this->status === 'draft') {
             $forms->draft();
