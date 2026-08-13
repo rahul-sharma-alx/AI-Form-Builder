@@ -177,7 +177,7 @@
             </div>
 
             <div class="flex justify-center">
-                <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url)"
+                <img :src="url ? 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url) : ''"
                     alt="QR code for this form" class="rounded-md border border-border" width="220" height="220">
             </div>
 
